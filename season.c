@@ -94,8 +94,7 @@ Driver SeasonGetDriverByPosition(Season season, int position, SeasonStatus* stat
 
 Driver* SeasonGetDriversStandings(Season season)
 {
-
-
+	return season->drivers;
 }
 
 Team SeasonGetTeamByPosition(Season season, int position, SeasonStatus* status)
@@ -111,8 +110,7 @@ Team SeasonGetTeamByPosition(Season season, int position, SeasonStatus* status)
 
 Team* SeasonGetTeamsStandings(Season season)
 {
-
-
+	return season->teams;
 }
 
 int SeasonGetNumberOfDrivers(Season season)
