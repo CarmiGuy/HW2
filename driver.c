@@ -7,9 +7,9 @@ struct driver
 {
 	int driverId;
 	char* driver_name;
-	Team team;
+	Team team; // should be a pointer??
 	int points;
-	Season season;
+	Season season; //same?
 };
 
 Driver DriverCreate(DriverStatus* status, char* driver_name, int driverId)
@@ -66,7 +66,7 @@ Team DriverGetTeam(Driver driver)
 
 void DriverSetTeam(Driver driver, Team team)
 {
-	driver->team = team;//MIGHT NEED TO CHANGE
+	driver->team = team;//MIGHT NEED TO CHANGE (no kidding :) )
 }
 
 void DriverSetSeason(Driver driver, Season season)
@@ -103,3 +103,12 @@ int DriverGetPoints(Driver driver, DriverStatus* status)
 	*status = DRIVER_STATUS_OK;
 	return driver->points;
 }
+
+void DriverCopy(driver* driver1, driver* driver2)
+{
+	driver* tempDriver = driver1;
+	driver1 = driver2;
+	driver2 = tempDriver;
+}
+
+

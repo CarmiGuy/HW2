@@ -129,7 +129,6 @@ SeasonStatus SeasonAddRaceResult(Season season, int* results)
 	{
 		return SEASON_NULL_PTR;
 	}
-	/* season->drivers[i]->driverID == driver at place i   */
 	int* oldPlacement = malloc((season->numOfDrivers)* sizeof(int)); //filled by id, arranged by last race
 	int* newPlacement = malloc((season->numOfDrivers)* sizeof(int));
 	int* newPosition = malloc((season->numOfDrivers)* sizeof(int)); //filled w/ score on last race, arranged by ID
@@ -143,7 +142,6 @@ SeasonStatus SeasonAddRaceResult(Season season, int* results)
 	{
 		oldPlacement[i] = (season->drivers->driverID-1);
 		newPlacement[i] = oldPlacement[i];
-		/*temporary - same complexity */
 	}
 
 	for(int i = 0; i < season->numOfDrivers; i++)
@@ -160,9 +158,7 @@ SeasonStatus SeasonAddRaceResult(Season season, int* results)
 	{
 		if (season->drivers[newPosition[i]]->driverID  != season->drivers[i]->driverID)
 		{
-			Driver* temp = season->drivers[i];
-			season->drivers[i] = season->drivers[newPosition[i]];
-			season->drivers[newPosition[i]] = temp;
+			DriverCopy(&(season->drivers[i]), &(season->drivers[newPosition[i]]));
 		}
 	}
 	/* change team position. */
@@ -196,18 +192,15 @@ SeasonStatus SeasonAddRaceResult(Season season, int* results)
 		{
 			if ((points[j] > points[j+1]) || (((points[j] == points[j+1]) && teamThing[j] > teamThing[j+1])))
 			{
-				Team* temp = season->teams[j];
-				season->teams[j] = season->teams[j+1];
-				season->teams[j+1] = temp;
+				Team* temp = *(season->teams[j]);
+				season->teams[j] = *(season->teams[j+1]);
+				*(season->teams[j+1]) = temp;
 				swap (&points[j], &points[j+1]);
 				swap(&teamThing[j], &teamThing[j+1]);
 			}
 		}
 
 	}
-
-/*	TODO: mergesort teams
- * mergeSort(, 0 ,markEnd, int oldPlacement, points) */
 	free(newPlacement);
 	free(newPosition);
 	free(oldPlacement);
