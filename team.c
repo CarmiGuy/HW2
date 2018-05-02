@@ -37,25 +37,33 @@ void TeamDestroy(Team team)
 
 TeamStatus TeamAddDriver(Team team, Driver driver)
 {
+    printf("TAD1\n");
+    printf("%s\n", TeamGetName(team));
     if(team == NULL || driver == NULL)
     {
         return TEAM_NULL_PTR;
     }
+    printf("TAD2\n");
     if(TeamGetDriver(team, FIRST_DRIVER) == NULL
        && TeamGetDriver(team, SECOND_DRIVER) == NULL)
     {
+        printf("TAD3\n");
         team->driver1 = driver;
     }
     else if(TeamGetDriver(team, FIRST_DRIVER) != NULL
             && TeamGetDriver(team, SECOND_DRIVER) == NULL)
     {
+        printf("TAD4\n");
         team->driver2 = driver;
     }
     else
     {
+        printf("TAD5\n");
         return TEAM_FULL;
     }
-    DriverSetTeam(driver, team);//MIGHT NEED TO CHANGE
+    printf("TAD6\n");
+    DriverSetTeam(driver, team); //MIGHT NEED TO CHANGE
+    printf("TAD7\n");
     return TEAM_STATUS_OK;
 }
 
