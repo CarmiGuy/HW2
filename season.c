@@ -122,10 +122,9 @@ static void SeasonGenerate(Season season, SeasonStatus* status,const char* seaso
                     }
                     DriverSetSeason(newDriver, season);
                     season->drivers[driverCounter] = newDriver;
-                    TeamAddDriver(season->teams[teamCounter], season->drivers[driverCounter]);
+                    TeamAddDriver(season->teams[teamCounter-1], season->drivers[driverCounter]);
                     printf("season driver %d = %s\n",(driverCounter+1),lineBuffer);
                     driverCounter++;
-
                 }
             }
         }
