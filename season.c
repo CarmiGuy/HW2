@@ -206,95 +206,42 @@ static void swap(int *xp, int *yp)
     *yp = temp;
 }
 
-static void merge(int arr[], int l, int m, int r, int* oldPlacement, int* arr2)
+static void BubbleSort(int objectNumber, int* points, int* desicionMaker, int* resultArr, Season season, char type)
 {
-    int i, j, k;
-    int n1 = m - l + 1;
-    int n2 =  r - m;
-
-    /* create temp arrays */
-    int L[n1], R[n2];
-
-    /* Copy data to temp arrays L[] and R[] */
-    for (i = 0; i < n1; i++)
-        L[i] = arr2[l + i];
-    for (j = 0; j < n2; j++)
-        R[j] = arr2[m + 1+ j];
-
-    /* Merge the temp arrays back into arr[l..r]*/
-    i = 0; // Initial index of first subarray
-    j = 0; // Initial index of second subarray
-    k = l; // Initial index of merged subarray
-    while (i < n1 && j < n2)
+    for (int i = 0; i < (objectNumber -1); i++)
     {
-        if (L[i] < R[j])
+        for (int j = 0; j < (objectNumber -i -1); j++)
         {
-            arr[k] = oldPlacement[l+i];
-            i++;
-        }
-        else if (L[i] == R[j])
-        {
-            if (oldPlacement[i+ l] > oldPlacement[m + 1+ j])
+            if ((points[j] < points[j+1]) || (((points[j] == points[j+1]) && desicionMaker[j] > desicionMaker[j+1])))
             {
-                arr[k] = oldPlacement[l+i];
-                i++;
-            }
-            else
-            {
-                arr[k] = oldPlacement[m + 1+ j];
-                j++;
+                if (type == 'D')
+                {
+                    DriverCopy(season->drivers[j], season->drivers[j+1]);
+                }
+                else
+                {
+                    TeamCopy(season->teams[j], season->teams[j+1]);
+                }
+                swap (&points[j], &points[j+1]);
+                swap(&resultArr[j], &resultArr[j+1]);
             }
         }
-        else
-        {
-            arr[k] = oldPlacement[m + 1+ j];
-            j++;
-        }
-        k++;
-    }
 
-    /* Copy the remaining elements of L[], if there
-       are any */
-    while (i < n1)
-    {
-        arr[k] = oldPlacement[l+i];
-        i++;
-        k++;
-    }
-
-    /* Copy the remaining elements of R[], if there
-       are any */
-    while (j < n2)
-    {
-        arr[k] = oldPlacement[m + 1+ j];
-        j++;
-        k++;
     }
 }
 
-/* l is for left index and r is right index of the
-   sub-array of arr to be sorted */
-static void mergeSort(int arr[], int l, int r, int* oldPlacement, int* arr2)
-{
-    if (l < r)
-    {
-        // Same as (l+r)/2, but avoids overflow for
-        // large l and h
-        int m = l+(r-l)/2;
-
-        // Sort first and second halves
-        mergeSort(arr, l, m, oldPlacement, arr2);
-        mergeSort(arr, m+1, r, oldPlacement, arr2);
-
-        merge(arr, l, m, r, oldPlacement, arr2);
-    }
-}
-
-void DriverCopy(Driver driver1, Driver driver2)
+static void DriverCopy(Driver driver1, Driver driver2)
 {
     Driver tempDriver = driver1;
     driver1 = driver2;
     driver2 = tempDriver;
+}
+
+static void TeamCopy(Team team1, Team team2)
+{
+    Team tempTeam = team1;
+    team1 = team2;
+    team2 = tempTeam;
 }
 
 SeasonStatus SeasonAddRaceResult(Season season, int* results)
@@ -309,7 +256,8 @@ SeasonStatus SeasonAddRaceResult(Season season, int* results)
     int* newPlacement = malloc(driversNumber* sizeof(int));
     int* newPosition = malloc(driversNumber* sizeof(int)); //filled w/ score on last race, arranged by ID
     int* points = malloc(driversNumber* sizeof(int));
-    if (oldPlacement == NULL || newPlacement == NULL || newPosition == NULL|| points == NULL)
+    int* resReverse = malloc(driversNumber* sizeof(int));
+    if (oldPlacement == NULL || newPlacement == NULL || newPosition == NULL|| points == NULL || resReverse)
     {
         return SEASON_MEMORY_ERROR;
     }
@@ -318,18 +266,19 @@ SeasonStatus SeasonAddRaceResult(Season season, int* results)
     {
         oldPlacement[i] = (DriverGetId(season->drivers[i])-1);
         newPlacement[i] = oldPlacement[i];
+        resReverse[results[i]-1] = (i+1);
     }
     for(int i = 0; i < driversNumber; i++)
     {
         DriverAddRaceResult(season->drivers[results[i]], (i + 1));
         points[i] = DriverGetPoints(season->drivers[i], &driverStatus);
     }
-    mergeSort(newPlacement, 0, (driversNumber-1), oldPlacement, points);
-    for (int i = 0; i < SeasonGetNumberOfDrivers(season); i++)
+    BubbleSort(driversNumber, points, resReverse, newPlacement, season, 'D');
+    for (int i = 0; i < driversNumber; i++)
     {
-        printf("op = %d, np= %d, driver= %s\n", oldPlacement[i], newPlacement[i], DriverGetName(season->drivers[i]));
+        printf("op = %d, np= %d, driver= %s, pts  %d=\n", oldPlacement[i], newPlacement[i],
+               DriverGetName(season->drivers[i]), points[i]);
     }
-
     for (int i = 0; i < driversNumber; i++)
     {
         newPosition[newPlacement[i]] = i;
@@ -343,8 +292,17 @@ SeasonStatus SeasonAddRaceResult(Season season, int* results)
     }
     /* change team position. */
     int* teamThing = malloc(teamsNumber* sizeof(int));
-    if (teamThing == NULL)
+    if (driversNumber < teamsNumber)
     {
+        points = realloc(points, (teamsNumber-driversNumber)*(sizeof(int)));
+    }
+    if (teamThing == NULL || points == NULL)
+    {
+        free(newPlacement);
+        free(newPosition);
+        free(oldPlacement);
+        free(points);
+        free(teamThing);
         return SEASON_MEMORY_ERROR;
     }
     for(int i = 0; i < teamsNumber; i++)
@@ -367,11 +325,12 @@ SeasonStatus SeasonAddRaceResult(Season season, int* results)
             }
         }
     }
+    BubbleSort(teamsNumber, points, teamThing, teamThing, season, 'T');
     for (int i = 0; i < (teamsNumber -1); i++)
     {
         for (int j = 0; j < (teamsNumber -i -1); j++)
         {
-            if ((points[j] > points[j+1]) || (((points[j] == points[j+1]) && teamThing[j] > teamThing[j+1])))
+            if ((points[j] < points[j+1]) || (((points[j] == points[j+1]) && teamThing[j] > teamThing[j+1])))
             {
                 Team temp = season->teams[j];
                 season->teams[j] = season->teams[j+1];
