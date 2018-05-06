@@ -205,6 +205,19 @@ static void swap(int *xp, int *yp)
     *xp = *yp;
     *yp = temp;
 }
+void DriverCopy(Driver driver1, Driver driver2)
+{
+    Driver tempDriver = driver1;
+    driver1 = driver2;
+    driver2 = tempDriver;
+}
+
+void TeamCopy(Team team1, Team team2)
+{
+    Team tempTeam = team1;
+    team1 = team2;
+    team2 = tempTeam;
+}
 
 static void BubbleSort(int objectNumber, int* points, int* desicionMaker, int* resultArr, Season season, char type)
 {
@@ -214,11 +227,7 @@ static void BubbleSort(int objectNumber, int* points, int* desicionMaker, int* r
         {
             if ((points[j] < points[j+1]) || (((points[j] == points[j+1]) && desicionMaker[j] > desicionMaker[j+1])))
             {
-                if (type == 'D')
-                {
-                    DriverCopy(season->drivers[j], season->drivers[j+1]);
-                }
-                else
+                if (type != 'D')
                 {
                     TeamCopy(season->teams[j], season->teams[j+1]);
                 }
@@ -230,19 +239,6 @@ static void BubbleSort(int objectNumber, int* points, int* desicionMaker, int* r
     }
 }
 
-static void DriverCopy(Driver driver1, Driver driver2)
-{
-    Driver tempDriver = driver1;
-    driver1 = driver2;
-    driver2 = tempDriver;
-}
-
-static void TeamCopy(Team team1, Team team2)
-{
-    Team tempTeam = team1;
-    team1 = team2;
-    team2 = tempTeam;
-}
 
 SeasonStatus SeasonAddRaceResult(Season season, int* results)
 {
