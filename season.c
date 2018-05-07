@@ -1,10 +1,12 @@
 #include "season.h"
 #include <string.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
+#include <stdlib.h>
 #include "team.h"
 #include "driver.h"
+#include "malloc.h"
 
 #define TEAM_NAME i
 #define DRIVER_ONE i + 1
@@ -20,8 +22,7 @@ struct season
 };
 
 static bool None(char* str);
-static void SeasonGenerate(Season season, SeasonStatus* status,const char* season_info);
-static void function(char* season_info1);
+static void SeasonGenerate(Season season, SeasonStatus* status, char* season_info);
 
 static bool None(char* str)
 {
@@ -35,6 +36,7 @@ static bool None(char* str)
 
 Season SeasonCreate(SeasonStatus* status,const char* season_info)
 {
+    *status = SEASON_OK;
     Season newSeason = malloc(sizeof(Season*));
     if(newSeason == NULL)
     {
@@ -50,98 +52,67 @@ Season SeasonCreate(SeasonStatus* status,const char* season_info)
     newSeason->numOfDrivers =0;
     newSeason->teams = NULL;
     newSeason->drivers = NULL;
-    SeasonGenerate(newSeason, status, season_info);
+    printf("SC is fine\n");
+    SeasonGenerate(newSeason, status, (char *) season_info);
     return newSeason;
 }
 
-static void SeasonGenerate(Season season, SeasonStatus* status,const char* season_info)
+static SeasonStatus handler(Season season, int *teamCounter, int *driverCounter, char *lineBuffer, int *purpose,
+                            SeasonStatus *status)
 {
-    int count = 0;
-    int purpose = 0, teamCounter = 0, driverCounter = 0;
-    bool error = false;
-    while ((count < (strlen(season_info)-1) && (!error)))
+    if (*purpose)
     {
-        int tempCount = count;
-        char *lineBuffer = malloc(sizeof(char));
-        while ((season_info[count] != '\n') && (season_info[count] != EOF)) {
-            if (count)
-            {
-                lineBuffer = realloc(lineBuffer, sizeof(char));
-            }
-            if (lineBuffer == NULL) {
-                printf("Error reallocating space for line buffer.");
-                free(lineBuffer);
-                error = true;
-                break;
-            }
-            lineBuffer[count-tempCount] = season_info[count];
-            count++;
-
-        }
-        if (!error)
+        if (1 == ((*purpose)%3))
         {
-            lineBuffer[count-tempCount] = '\0';
-            if (purpose)
+            *purpose = (*purpose + 1);
+            TeamStatus teamStatus = TEAM_STATUS_OK;
+            Team newTeam = TeamCreate(&teamStatus, lineBuffer);
+            season->teams = realloc(season->teams, sizeof(Team*));
+            if(teamStatus == TEAM_MEMORY_ERROR || season->teams == NULL)
             {
-                if (1 == (purpose%3))
-                {
-                    purpose++;
-                    TeamStatus teamStatus = TEAM_STATUS_OK;
-                    Team newTeam = TeamCreate(&teamStatus, lineBuffer);
-                    season->teams = realloc(season->teams, sizeof(Team*));
-                    if(teamStatus == TEAM_MEMORY_ERROR || season->teams == NULL)
-                    {
-                        *status = SEASON_MEMORY_ERROR;
-                        free(lineBuffer);
-                        break;
-                    }
-                    season->teams[teamCounter] = newTeam;
-                    teamCounter++;
-                    season->numOfTeams = (season->numOfTeams +1);
-                }
-                else
-                {
-                    purpose++;
-                    if (((count-tempCount) == 4) && (None(lineBuffer)))
-                    {
-                        printf("catch none\n");
-                    }
-                    else
-                    {
-                        DriverStatus driverStatus = DRIVER_STATUS_OK;
-                        Driver newDriver = DriverCreate(&driverStatus, lineBuffer, (driverCounter+1));
-                        season->drivers = realloc(season->drivers, sizeof(Driver*));
-                        if(driverStatus == DRIVER_MEMORY_ERROR || season->drivers == NULL)
-                        {
-                            *status = SEASON_MEMORY_ERROR;
-                            free(lineBuffer);
-                            break;
-                        }
-                        DriverSetSeason(newDriver, season);
-                        season->drivers[driverCounter] = newDriver;
-                        TeamAddDriver(season->teams[teamCounter-1], season->drivers[driverCounter]);
-                        driverCounter++;
-                        season->numOfDrivers = (season->numOfDrivers +1);
-                    }
-                }
+                *status = SEASON_MEMORY_ERROR;
+                return *status;
+            }
+            season->teams[*teamCounter] = newTeam;
+            *teamCounter = (*teamCounter + 1);
+            season->numOfTeams = (season->numOfTeams +1);
+        }
+        else
+        {
+            *purpose = (*purpose + 1);
+            if (((strlen(lineBuffer)) == 4) && (None(lineBuffer)))
+            {
+                printf("catch none\n");
             }
             else
             {
-                purpose++;
-                int begin = 0;
-                while (lineBuffer[begin] == ' ')
+                DriverStatus driverStatus = DRIVER_STATUS_OK;
+                Driver newDriver = DriverCreate(&driverStatus, lineBuffer, (*driverCounter+1));
+                season->drivers = realloc(season->drivers, sizeof(Driver*));
+                if(driverStatus == DRIVER_MEMORY_ERROR || season->drivers == NULL)
                 {
-                    begin++;
+                    *status = SEASON_MEMORY_ERROR;
+                    return *status;
                 }
-                season->year = atoi(lineBuffer+begin);
+                DriverSetSeason(newDriver, season);
+                season->drivers[*driverCounter] = newDriver;
+                TeamAddDriver(season->teams[*teamCounter-1], season->drivers[*driverCounter]);
+                *driverCounter= (*driverCounter+ 1);
+                season->numOfDrivers = (season->numOfDrivers +1);
             }
-            free(lineBuffer);
-            count++;
         }
     }
-    printf("succesfully created season!\n");
+    else
+    {
+        *purpose = (*purpose + 1);
+        int begin = 0;
+        while (lineBuffer[begin] == ' ')
+        {
+            begin++;
+        }
+        season->year = atoi(lineBuffer+begin);
+    }
 }
-
 void SeasonDestroy(Season season)
 {
     for(int i = 0; i < season->numOfDrivers; i++)
@@ -156,6 +127,54 @@ void SeasonDestroy(Season season)
     free(season->teams);
     free(season);
 }
+
+static void SeasonGenerate(Season season, SeasonStatus* status, char* season_info)
+{
+    int count = 0, stringSize = 1;
+    int purpose = 0, teamCounter = 0, driverCounter = 0;
+    bool error = false;
+    while ((count < (strlen(season_info)-1) && (!error)))
+    {
+        int tempCount = count;
+        char *lineBuffer = NULL;
+        lineBuffer = calloc(1, sizeof(char));
+        printf("2");
+        if (lineBuffer == NULL)
+        {
+            *status = SEASON_MEMORY_ERROR;
+            error = true;
+            break;
+        }
+        stringSize=1;
+        printf("DYE!\n");
+        while (((season_info[count] != '\n') && (season_info[count] != EOF)) && (!error))
+        {
+            lineBuffer = realloc(lineBuffer,(1+stringSize)* sizeof(char));
+            stringSize++;
+            if (lineBuffer == NULL)
+            {
+                printf("Error reallocating space for line buffer.");
+                *status = SEASON_MEMORY_ERROR;
+                error = true;
+                break;
+            }
+            lineBuffer[count-tempCount] = season_info[count];
+            count++;
+        }
+        if (lineBuffer && (stringSize - (count-teamCounter) >=0 ))
+        {
+            lineBuffer[count - tempCount] = '\0';
+            handler(season, &teamCounter, &driverCounter, lineBuffer, &purpose, status);
+        }
+        printf("%s\n", lineBuffer);
+        free(lineBuffer);
+        count++;
+        printf("111111\n");
+    }
+
+    printf("succesfully created season!\n");
+}
+
 
 Driver SeasonGetDriverByPosition(Season season, int position, SeasonStatus* status)
 {
@@ -221,6 +240,7 @@ void TeamCopy(Team team1, Team team2)
 
 static void BubbleSort(int objectNumber, int* points, int* desicionMaker, int* resultArr, Season season, char type)
 {
+    assert(season != NULL);
     for (int i = 0; i < (objectNumber -1); i++)
     {
         for (int j = 0; j < (objectNumber -i -1); j++)
@@ -242,7 +262,7 @@ static void BubbleSort(int objectNumber, int* points, int* desicionMaker, int* r
 
 SeasonStatus SeasonAddRaceResult(Season season, int* results)
 {
-    if(season == NULL || results == NULL)
+    if(season == NULL || results == NULL || season->drivers == NULL || season->teams == NULL)
     {
         return SEASON_NULL_PTR;
     }
