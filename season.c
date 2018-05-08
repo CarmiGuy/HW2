@@ -128,48 +128,47 @@ void SeasonDestroy(Season season)
     free(season);
 }
 
+static void FillString(char *dest ,char *source ,int begin ,int count)
+{
+    for (int i = begin; i< count; i++)
+    {
+        dest[i - begin] = source[i];
+    }
+    dest[count-begin] = '\0';
+}
+
 static void SeasonGenerate(Season season, SeasonStatus* status, char* season_info)
 {
-    int count = 0, stringSize = 1;
+    int count = 0;
     int purpose = 0, teamCounter = 0, driverCounter = 0;
     bool error = false;
     while ((count < (strlen(season_info)-1) && (!error)))
     {
         int tempCount = count;
-        char *lineBuffer = NULL;
-        lineBuffer = calloc(1, sizeof(char));
-        printf("2");
-        if (lineBuffer == NULL)
-        {
-            *status = SEASON_MEMORY_ERROR;
-            error = true;
-            break;
-        }
-        stringSize=1;
-        printf("DYE!\n");
         while (((season_info[count] != '\n') && (season_info[count] != EOF)) && (!error))
         {
-            lineBuffer = realloc(lineBuffer,(1+stringSize)* sizeof(char));
-            stringSize++;
+            count++;
+        }
+        printf("%d, %d, %c\n", count, tempCount, season_info[count-1]);
+        if ((count-tempCount) >= 0)
+        {
+            char *lineBuffer = malloc((count-tempCount +1)* sizeof(char));
+
             if (lineBuffer == NULL)
             {
                 printf("Error reallocating space for line buffer.");
                 *status = SEASON_MEMORY_ERROR;
                 error = true;
-                break;
             }
-            lineBuffer[count-tempCount] = season_info[count];
-            count++;
+            else
+            {
+                FillString(lineBuffer, season_info, tempCount, count);
+                handler(season, &teamCounter, &driverCounter, lineBuffer, &purpose, status);
+                printf("%s\n", lineBuffer);
+                free(lineBuffer);
+            }
         }
-        if (lineBuffer && (stringSize - (count-teamCounter) >=0 ))
-        {
-            lineBuffer[count - tempCount] = '\0';
-            handler(season, &teamCounter, &driverCounter, lineBuffer, &purpose, status);
-        }
-        printf("%s\n", lineBuffer);
-        free(lineBuffer);
         count++;
-        printf("111111\n");
     }
 
     printf("succesfully created season!\n");
