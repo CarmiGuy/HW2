@@ -91,7 +91,7 @@ static SeasonStatus handler(Season season, int *teamCounter, int *driverCounter,
 			}
 			else
 			{
-				season->teams = realloc(season->teams, sizeof(season->teams) + sizeof(Team));
+				season->teams = realloc(season->teams, ((*teamCounter + 1))*sizeof(Team));
 				if (teamStatus == TEAM_MEMORY_ERROR || season->teams == NULL)
 				{
 					*status = SEASON_MEMORY_ERROR;
