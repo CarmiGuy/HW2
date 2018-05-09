@@ -255,20 +255,23 @@ static void swap(int *xp, int *yp)
     *xp = *yp;
     *yp = temp;
 }
-void DriverCopy(void *driver1, void *driver2)
+void DriverCopy(Driver driver1,Driver driver2)
 {
-    Driver tempDriver = (Driver) driver1;
-    (Driver) driver1 = driver2;
-    (Driver) driver2 =(void*) tempDriver;
+    Driver* tempDriver1 = &driver1;
+    Driver* tempDriver2 = &driver2;
+    Driver* tempDriver3 = tempDriver1;
+    tempDriver1 = (Driver *) tempDriver2;
+    tempDriver2 = (Driver *) tempDriver3;
 }
 
-void TeamCopy(Team team1, Team team2)
+void TeamCopy(Team team1,Team team2)
 {
-    Team tempTeam = team1;
-    team1 = team2;
-    team2 = tempTeam;
+    Team* tempTeam1 = &team1;
+    Team* tempTeam2 = &team2;
+    Team* tempTeam3 = tempTeam1;
+    tempTeam1 = (Team *) tempTeam2;
+    tempTeam2 = (Team *) tempTeam3;
 }
-
 static void BubbleSort(int objectNumber, int* points, int* desicionMaker, int* resultArr, Season season, char type)
 {
     for (int i = 0; i < (objectNumber - 1); i++)
