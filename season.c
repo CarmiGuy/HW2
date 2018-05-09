@@ -126,7 +126,7 @@ static SeasonStatus handler(Season season, int *teamCounter, int *driverCounter,
 				}
 				else
 				{
-					season->drivers = realloc(season->drivers, sizeof(season->drivers)+sizeof(Driver));
+					season->drivers = realloc(season->drivers, sizeof(Driver)*(*driverCounter + 1));
 					if (driverStatus == DRIVER_MEMORY_ERROR || season->drivers == NULL)
 					{
 						*status = SEASON_MEMORY_ERROR;
@@ -313,8 +313,8 @@ static void BubbleSort(int objectNumber, int* points, int* desicionMaker, int* r
 				}
 				else
 				{
-					swap(&desicionMaker[j], &desicionMaker[j+1]);
-					DriverCopy(season->drivers[j], season->drivers[j+1]);
+					swap(&desicionMaker[j], &desicionMaker[j + 1]);
+					DriverCopy(season->drivers[j], season->drivers[j + 1]);
 				}
 				swap(&points[j], &points[j + 1]);
 				swap(&resultArr[j], &resultArr[j + 1]);
@@ -355,7 +355,7 @@ SeasonStatus SeasonAddRaceResult(Season season, int* results)
 	}
 	for (int i = 0; i < driversNumber; i++)
 	{
-		DriverAddRaceResult(season->drivers[newPosition[results[i]-1]], (i + 1));
+		DriverAddRaceResult(season->drivers[newPosition[results[i] - 1]], (i + 1));
 		points[i] = DriverGetPoints(season->drivers[i], &driverStatus);
 	}
 	BubbleSort(driversNumber, points, resReverse, newPlacement, season, 'D');
@@ -364,17 +364,17 @@ SeasonStatus SeasonAddRaceResult(Season season, int* results)
 		printf("op = %d, np= %d, driver= %s, pts  %d=\n", oldPlacement[i], newPlacement[i],
 			DriverGetName(season->drivers[i]), points[i]);
 	} /*
-	for (int i = 0; i < driversNumber; i++)
-	{
-		newPosition[newPlacement[i]] = i;
-	}
-	for (int i = 0; i < driversNumber; i++)
-	{
-		if (DriverGetId(season->drivers[newPosition[i]]) != DriverGetId(season->drivers[i]))
-		{
-			DriverCopy((season->drivers[i]), (season->drivers[newPosition[i]]));
-		}
-	} */
+	  for (int i = 0; i < driversNumber; i++)
+	  {
+	  newPosition[newPlacement[i]] = i;
+	  }
+	  for (int i = 0; i < driversNumber; i++)
+	  {
+	  if (DriverGetId(season->drivers[newPosition[i]]) != DriverGetId(season->drivers[i]))
+	  {
+	  DriverCopy((season->drivers[i]), (season->drivers[newPosition[i]]));
+	  }
+	  } */
 	int* teamThing = malloc(teamsNumber * sizeof(int));
 	if (driversNumber < teamsNumber)
 	{
@@ -419,5 +419,3 @@ SeasonStatus SeasonAddRaceResult(Season season, int* results)
 	free(resReverse);
 	return SEASON_OK;
 }
-
-
