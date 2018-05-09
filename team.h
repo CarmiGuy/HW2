@@ -1,6 +1,6 @@
 /*
- * team.h
- */
+* team.h
+*/
 
 #ifndef TEAM_H_
 #define TEAM_H_
@@ -10,11 +10,12 @@ typedef struct team * Team;
 #include "driver.h"
 
 typedef enum teamStatus {
-    TEAM_STATUS_OK,
-    TEAM_MEMORY_ERROR,
-    TEAM_NULL_PTR,
-    TEAM_FULL} TeamStatus;
-typedef enum driverNumber {FIRST_DRIVER, SECOND_DRIVER} DriverNumber;
+	TEAM_STATUS_OK,
+	TEAM_MEMORY_ERROR,
+	TEAM_NULL_PTR,
+	TEAM_FULL
+} TeamStatus;
+typedef enum driverNumber { FIRST_DRIVER, SECOND_DRIVER } DriverNumber;
 
 
 Team TeamCreate(TeamStatus* status, char* name);

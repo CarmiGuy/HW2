@@ -1,6 +1,6 @@
 /*
- * driver.h
- */
+* driver.h
+*/
 
 #ifndef DRIVER_H_
 #define DRIVER_H_
@@ -11,11 +11,12 @@ typedef struct driver * Driver;
 #include "season.h"
 
 typedef enum driverStatus {
-    DRIVER_STATUS_OK,
-    SEASON_NOT_ASSIGNED,
-    DRIVER_MEMORY_ERROR,
-    INVALID_DRIVER,
-    INVALID_POSITION} DriverStatus;
+	DRIVER_STATUS_OK,
+	SEASON_NOT_ASSIGNED,
+	DRIVER_MEMORY_ERROR,
+	INVALID_DRIVER,
+	INVALID_POSITION
+} DriverStatus;
 
 
 
