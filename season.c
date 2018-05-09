@@ -311,6 +311,11 @@ static void BubbleSort(int objectNumber, int* points, int* desicionMaker, int* r
 				{
 					TeamCopy(season->teams[j], season->teams[j + 1]);
 				}
+				else
+				{
+					swap(&desicionMaker[j], &desicionMaker[j+1]);
+					DriverCopy(season->drivers[j], season->drivers[j+1]);
+				}
 				swap(&points[j], &points[j + 1]);
 				swap(&resultArr[j], &resultArr[j + 1]);
 			}
@@ -346,8 +351,11 @@ SeasonStatus SeasonAddRaceResult(Season season, int* results)
 	}
 	for (int i = 0; i < driversNumber; i++)
 	{
-		//*** fix - it shouldn't go by position - it changes a lot***/
-		DriverAddRaceResult(season->drivers[results[i]], (i + 1));
+		newPosition[oldPlacement[i]] = i;
+	}
+	for (int i = 0; i < driversNumber; i++)
+	{
+		DriverAddRaceResult(season->drivers[newPosition[results[i]-1]], (i + 1));
 		points[i] = DriverGetPoints(season->drivers[i], &driverStatus);
 	}
 	BubbleSort(driversNumber, points, resReverse, newPlacement, season, 'D');
@@ -355,7 +363,7 @@ SeasonStatus SeasonAddRaceResult(Season season, int* results)
 	{
 		printf("op = %d, np= %d, driver= %s, pts  %d=\n", oldPlacement[i], newPlacement[i],
 			DriverGetName(season->drivers[i]), points[i]);
-	}
+	} /*
 	for (int i = 0; i < driversNumber; i++)
 	{
 		newPosition[newPlacement[i]] = i;
@@ -366,8 +374,7 @@ SeasonStatus SeasonAddRaceResult(Season season, int* results)
 		{
 			DriverCopy((season->drivers[i]), (season->drivers[newPosition[i]]));
 		}
-	}
-	/* change team position. */
+	} */
 	int* teamThing = malloc(teamsNumber * sizeof(int));
 	if (driversNumber < teamsNumber)
 	{
@@ -404,21 +411,6 @@ SeasonStatus SeasonAddRaceResult(Season season, int* results)
 		}
 	}
 	BubbleSort(teamsNumber, points, teamThing, teamThing, season, 'T');
-	for (int i = 0; i < (teamsNumber - 1); i++)
-	{
-		for (int j = 0; j < (teamsNumber - i - 1); j++)
-		{
-			if ((points[j] < points[j + 1]) || (((points[j] == points[j + 1]) && teamThing[j] > teamThing[j + 1])))
-			{
-				Team temp = season->teams[j];
-				season->teams[j] = season->teams[j + 1];
-				season->teams[j + 1] = temp;
-				swap(&points[j], &points[j + 1]);
-				swap(&teamThing[j], &teamThing[j + 1]);
-			}
-		}
-
-	}
 	free(newPlacement);
 	free(newPosition);
 	free(oldPlacement);
