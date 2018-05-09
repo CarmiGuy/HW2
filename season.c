@@ -258,8 +258,8 @@ static void swap(int *xp, int *yp)
 void DriverCopy(void *driver1, void *driver2)
 {
     Driver tempDriver = (Driver) driver1;
-    (Driver) driver1 = (Driver) driver2;
-    (Driver) driver2 = tempDriver;
+    (Driver) driver1 = driver2;
+    (Driver) driver2 =(void*) tempDriver;
 }
 
 void TeamCopy(Team team1, Team team2)
