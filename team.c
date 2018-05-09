@@ -30,44 +30,36 @@ Team TeamCreate(TeamStatus* status, char* name)
 void TeamDestroy(Team team)
 {
     free(team->name);
-    free(team->driver1);
-    free(team->driver2);
+   /* free(team->driver1);
+    free(team->driver2); */
     free(team);
 }
 
 TeamStatus TeamAddDriver(Team team, Driver driver)
 {
-    printf("TAD1\n");
-    printf("%s\n", TeamGetName(team));
     if(team == NULL || driver == NULL)
     {
         return TEAM_NULL_PTR;
     }
-    printf("TAD2\n");
     if(TeamGetDriver(team, FIRST_DRIVER) == NULL
        && TeamGetDriver(team, SECOND_DRIVER) == NULL)
     {
-        printf("TAD3\n");
         team->driver1 = driver;
     }
     else if(TeamGetDriver(team, FIRST_DRIVER) != NULL
             && TeamGetDriver(team, SECOND_DRIVER) == NULL)
     {
-        printf("TAD4\n");
         team->driver2 = driver;
     }
     else
     {
-        printf("TAD5\n");
         return TEAM_FULL;
     }
-    printf("TAD6\n");
     DriverSetTeam(driver, team); //MIGHT NEED TO CHANGE
-    printf("TAD7\n");
     return TEAM_STATUS_OK;
 }
 
-const char * TeamGetName(Team team)
+const char* TeamGetName(Team team)
 {
     if(team == NULL)
     {
@@ -102,7 +94,7 @@ int TeamGetPoints(Team team, TeamStatus *status)
     int secondDriverPoints = DriverGetPoints(team->driver2, &driverStatus2);
     if(driverStatus1 == DRIVER_STATUS_OK && driverStatus2 == DRIVER_STATUS_OK)
     {
-        return firstDriverPoints + secondDriverPoints;
+        return (firstDriverPoints + secondDriverPoints);
     }
     else if(driverStatus1 == DRIVER_STATUS_OK && driverStatus2 == INVALID_DRIVER)
     {

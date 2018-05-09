@@ -33,8 +33,9 @@ Driver DriverCreate(DriverStatus* status, char* driver_name, int driverId)
 void DriverDestroy(Driver driver)
 {
     free(driver->driver_name);
-    free(driver->team);
-    free(driver->season);
+   /* free(driver->team); */
+   /* free(driver->season); */
+    free(driver);
 }
 
 const char* DriverGetName(Driver driver)
@@ -77,35 +78,40 @@ void DriverSetSeason(Driver driver, Season season)
 
 DriverStatus DriverAddRaceResult(Driver driver, int position)
 {
-    printf("DARR1\n");
+    if (driver != NULL)
+    {
+        printf("%s, %d\n", DriverGetName(driver), DriverGetId(driver));
+    }
+    else
+    {
+        printf("bug bug\n");
+    }
     if(position <= 0)
     {
+        printf("bug\n");
         return INVALID_POSITION;
     }
-    printf("DARR2\n");
     if(driver == NULL)
     {
         return INVALID_DRIVER;
     }
-    printf("DARR3\n");
+    printf("%s, %d\n", DriverGetName(driver), DriverGetId(driver));
     if(driver->season == NULL)
     {
+        printf("bug bug bug\n");
         return SEASON_NOT_ASSIGNED;
     }
-    printf("DARR4\n");
     driver->points += (SeasonGetNumberOfDrivers(driver->season) - position);
     return DRIVER_STATUS_OK;
 }
 
 int DriverGetPoints(Driver driver, DriverStatus* status)
 {
-    printf("DGP1\n");
     if(driver == NULL)
     {
         *status = INVALID_DRIVER;
         return 0;
     }
-    printf("DGP2\n");
     *status = DRIVER_STATUS_OK;
     return driver->points;
 }
