@@ -71,6 +71,10 @@ TeamStatus TeamAddDriver(Team team, Driver driver)
 	else if (TeamGetDriver(team, FIRST_DRIVER) != NULL
 		&& TeamGetDriver(team, SECOND_DRIVER) == NULL)
 	{
+		if (strcmp(DriverGetName(team->driver1), DriverGetName(driver)) == 0)
+		{
+			return TEAM_FULL;
+		}
 		team->driver2 = driver;
 	}
 	else

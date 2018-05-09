@@ -259,10 +259,11 @@ Team SeasonGetTeamByPosition(Season season, int position, SeasonStatus* status)
 	}
 	if (season == NULL || position <= 0 || position > season->numOfTeams)
 	{
-		*status = SEASON_MEMORY_ERROR;
+		*status = SEASON_NULL_PTR;
 		return NULL;
 	}
 	Team* rankedTeams = SeasonGetTeamsStandings(season);
+	*status = SEASON_OK;
 	return rankedTeams[position - 1];
 }
 
